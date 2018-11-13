@@ -7,9 +7,9 @@ from boa.interop.System.Storage import GetContext, Get, Put, Delete
 from boa.interop.System.Runtime import CheckWitness, GetTime, Notify
 from boa.interop.System.ExecutionEngine import GetExecutingScriptHash
 
-ont_address = bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01')
-ong_address = bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02')
-saving_pot_address = GetExecutingScriptHash()
+ONT_ADDRESS = bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01')
+ONG_ADDRESS = bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02')
+SAVING_POT_ADDRESS = GetExecutingScriptHash()
 
 CTX = GetContext()
 SAVING_ONT_TIME_PREFIX = 'STT'
@@ -19,14 +19,18 @@ SAVING_ONG_AMOUNT_PREFIX = 'SGA'
 
 
 def main(operation, args):
-    if operation == "saving_ont":
+    if operation == 'saving_ont':
         return saving_ont(args[0], args[1])
-    elif operation == "saving_ong":
+    elif operation == 'saving_ong':
         return saving_ong(args[0], args[1])
-    elif operation == "create_ont_pot":
+    elif operation == 'create_ont_pot':
         return create_ont_pot(args[0], args[1])
-    elif operation == "create_ong_pot":
+    elif operation == 'create_ong_pot':
         return create_ong_pot(args[0], args[1])
+    elif operation == 'take_ont_out':
+        return take_ont_out(args[0])
+    elif operation == 'take_ong_out':
+        return take_ong_out(args[0])
     else:
         return revert()
 
@@ -72,8 +76,8 @@ def concat_key(str1, str2):
 def transfer_ont(from_acct, to_acct, amount):
     require_witness(from_acct)
     transfer_param = state(from_acct, to_acct, amount)
-    res = Invoke(0, ont_address, 'transfer', [transfer_param])
-    if res and res == b'\x01':
+    res = Invoke(0, ONT_ADDRESS, 'transfer', [transfer_param])
+    if res == b'\x01':
         return True
     else:
         return False
@@ -82,8 +86,8 @@ def transfer_ont(from_acct, to_acct, amount):
 def transfer_ong(from_acct, to_acct, amount):
     require_witness(from_acct)
     transfer_param = state(from_acct, to_acct, amount)
-    res = Invoke(0, ong_address, 'transfer', [transfer_param])
-    if res and res == b'\x01':
+    res = Invoke(0, ONG_ADDRESS, 'transfer', [transfer_param])
+    if res == b'\x01':
         return True
     else:
         return False
@@ -112,10 +116,16 @@ def create_ong_pot(from_acct, time_limit):
 
 
 def saving_ont(from_acct, amount):
+    if amount < 0:
+        revert()
     saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, from_acct)
     saving_time = Get(CTX, saving_time_key)
     if saving_time <= GetTime():
-        transfer_ont(from_acct, saving_pot_address, amount)
+        transfer_ont(from_acct, SAVING_POT_ADDRESS, amount)
+        saving_amount_key = concat_key(SAVING_ONT_AMOUNT_PREFIX, from_acct)
+        saving_amount = Get(CTX, saving_amount_key)
+        saving_amount += amount
+        Put(CTX, saving_amount_key, saving_amount)
     else:
         revert()
 
@@ -125,6 +135,38 @@ def saving_ong(from_acct, amount):
     saving_time = Get(CTX, saving_time_key)
     Notify([saving_time, GetTime()])
     if saving_time <= GetTime():
-        transfer_ong(from_acct, saving_pot_address, amount)
+        transfer_ong(from_acct, SAVING_POT_ADDRESS, amount)
+        saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, from_acct)
+        saving_amount = Get(CTX, saving_amount_key)
+        saving_amount += amount
+        Put(CTX, saving_amount_key, saving_amount)
+    else:
+        revert()
+
+
+def take_ont_out(to_acct):
+    require_witness(to_acct)
+    saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, to_acct)
+    saving_time = Get(CTX, saving_time_key)
+    if saving_time > GetTime():
+        saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, to_acct)
+        saving_amount = Get(CTX, saving_amount_key)
+        transfer_ont(SAVING_POT_ADDRESS, to_acct, saving_amount)
+        saving_amount = 0
+        Put(CTX, saving_amount_key, saving_amount)
+    else:
+        revert()
+
+
+def take_ong_out(to_acct):
+    require_witness(to_acct)
+    saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, to_acct)
+    saving_time = Get(CTX, saving_time_key)
+    if saving_time > GetTime():
+        saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, to_acct)
+        saving_amount = Get(CTX, saving_amount_key)
+        transfer_ong(SAVING_POT_ADDRESS, to_acct, saving_amount)
+        saving_amount = 0
+        Put(CTX, saving_amount_key, saving_amount)
     else:
         revert()
