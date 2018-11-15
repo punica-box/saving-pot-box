@@ -97,7 +97,9 @@ def create_ont_pot(from_acct, time_limit):
     require_witness(from_acct)
     saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, from_acct)
     if not Get(CTX, saving_time_key):
+        saving_time = GetTime() + time_limit
         Put(CTX, saving_time_key, time_limit)
+        Notify(['saving time', saving_time])
         saving_amount_key = concat_key(SAVING_ONT_AMOUNT_PREFIX, from_acct)
         Put(CTX, saving_amount_key, 0)
     else:
@@ -108,7 +110,9 @@ def create_ong_pot(from_acct, time_limit):
     require_witness(from_acct)
     saving_time_key = concat_key(SAVING_ONG_TIME_PREFIX, from_acct)
     if not Get(CTX, saving_time_key):
+        saving_time = GetTime() + time_limit
         Put(CTX, saving_time_key, time_limit)
+        Notify(['saving time', saving_time])
         saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, from_acct)
         Put(CTX, saving_amount_key, 0)
     else:
