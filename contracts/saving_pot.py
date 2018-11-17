@@ -64,8 +64,8 @@ def add(a, b):
 
 
 def sub(a, b):
+    require(a >= b)
     c = a - b
-    require(a >= c)
     return c
 
 
