@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from boa.interop.Ontology.Native import Invoke
 from boa.builtins import ToScriptHash, concat, state
 from boa.interop.System.Storage import GetContext, Get, Put, Delete
@@ -27,6 +24,10 @@ def main(operation, args):
         return create_ont_pot(args[0], args[1])
     elif operation == 'create_ong_pot':
         return create_ong_pot(args[0], args[1])
+    elif operation == 'query_ont_pot_saving_time':
+        return query_ont_pot_saving_time(args[0])
+    elif operation == 'query_ong_pot_saving_time':
+        return query_ont_pot_saving_time(args[0])
     elif operation == 'take_ont_out':
         return take_ont_out(args[0])
     elif operation == 'take_ong_out':
@@ -104,6 +105,24 @@ def create_ont_pot(from_acct, time_limit):
         Put(CTX, saving_amount_key, 0)
     else:
         revert()
+
+
+def query_ont_pot_saving_time(from_acct):
+    saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, from_acct)
+    saving_time = Get(saving_time_key)
+    if not saving_time:
+        return 0
+    else:
+        return saving_time
+
+
+def query_ong_pot_saving_time(from_acct):
+    saving_time_key = concat_key(SAVING_ONG_TIME_PREFIX, from_acct)
+    saving_time = Get(saving_time_key)
+    if not saving_time:
+        return 0
+    else:
+        return saving_time
 
 
 def create_ong_pot(from_acct, time_limit):
