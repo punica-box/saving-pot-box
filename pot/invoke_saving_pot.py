@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import binascii
+import time
 
+from ontology.exception.exception import SDKException
 from ontology.ont_sdk import OntologySdk
 from ontology.account.account import Account
 from ontology.smart_contract.neo_contract.abi.abi_info import AbiInfo
@@ -39,13 +41,119 @@ class InvokeSavingPot(object):
     def create_ont_pot(self, from_acct: Account, time_limit: int, gas_limit: int = 20000000, gas_price: int = 500):
         create_function = self.__abi_info.get_function('create_ont_pot')
         create_function.set_params_value((from_acct.get_address().to_array(), time_limit))
-        tx_hash = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
-                                                       gas_limit, gas_price, create_function, False)
-        return tx_hash
+        try:
+            tx_hash = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
+                                                           gas_limit, gas_price, create_function, False)
+            return tx_hash
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ont_pot_failed)
 
     def create_ong_pot(self, from_acct: Account, time_limit: int, gas_limit: int, gas_price: int):
         create_function = self.__abi_info.get_function('create_ong_pot')
         create_function.set_params_value((from_acct.get_address().to_array(), time_limit))
-        tx_hash = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
-                                                       gas_limit, gas_price, create_function, False)
-        return tx_hash
+        try:
+            tx_hash = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
+                                                           gas_limit, gas_price, create_function, False)
+            return tx_hash
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
+    def put_ont_pot_tx_hash(self, from_acct: Account, tx_hash: str, gas_limit: int, gas_price: int):
+        put_ont_pot_tx_hash = self.__abi_info.get_function('put_ont_pot_tx_hash')
+        put_ont_pot_tx_hash.set_params_value((from_acct.get_address().to_array(), tx_hash))
+        try:
+            tx_hash = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
+                                                           gas_limit, gas_price, put_ont_pot_tx_hash, False)
+            return tx_hash
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
+    def get_ont_pot_tx_hash(self, bytearray_address: bytearray):
+        get_ont_pot_tx_hash = self.__abi_info.get_function('get_ont_pot_tx_hash')
+        get_ont_pot_tx_hash.set_params_value((bytearray_address,))
+        try:
+            data = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, None, None,
+                                                        0, 0, get_ont_pot_tx_hash, True)
+            data = binascii.a2b_hex(data).decode('ascii')
+            return data
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
+    def put_ong_pot_tx_hash(self, from_acct: Account, tx_hash: str, gas_limit: int, gas_price: int):
+        put_ont_pot_tx_hash = self.__abi_info.get_function('put_ong_pot_tx_hash')
+        put_ont_pot_tx_hash.set_params_value((from_acct.get_address().to_array(), tx_hash))
+        try:
+            return self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
+                                                        gas_limit, gas_price, put_ont_pot_tx_hash, False)
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
+    def get_ong_pot_tx_hash(self, bytearray_address: bytearray):
+        get_ont_pot_tx_hash = self.__abi_info.get_function('get_ong_pot_tx_hash')
+        get_ont_pot_tx_hash.set_params_value((bytearray_address,))
+        try:
+            data = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, None, None,
+                                                        0, 0, get_ont_pot_tx_hash, True)
+            data = binascii.a2b_hex(data).decode('ascii')
+            return data
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
+    def take_ong_out(self, from_acct: Account, gas_limit: int, gas_price: int):
+        take_ong_out = self.__abi_info.get_function('take_ong_out')
+        take_ong_out.set_params_value((from_acct.get_address().to_array(),))
+        try:
+            tx_hash = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
+                                                           gas_limit, gas_price, take_ong_out, False)
+            return tx_hash
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
+    def query_ont_pot_saving_time(self, bytearray_address: bytearray) -> int:
+        query_function = self.__abi_info.get_function('query_ont_pot_saving_time')
+        query_function.set_params_value((bytearray_address,))
+        saving_time = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, None, None, 0, 0,
+                                                           query_function, True)
+        saving_time = int(''.join(reversed([saving_time[i:i + 2] for i in range(0, len(saving_time), 2)])), 16)
+        return saving_time
+
+    def query_ong_pot_saving_time(self, bytearray_address: bytearray) -> int:
+        query_function = self.__abi_info.get_function('query_ong_pot_saving_time')
+        query_function.set_params_value((bytearray_address,))
+        saving_time = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, None, None, 0, 0,
+                                                           query_function, True)
+        saving_time = int(''.join(reversed([saving_time[i:i + 2] for i in range(0, len(saving_time), 2)])), 16)
+        return saving_time
+
+    def query_create_pot_event(self, tx_hash: str):
+        event = self.__sdk.rpc.get_smart_contract_event_by_tx_hash(tx_hash).get('Notify', list())
+        if len(event) == 0:
+            return event
+        event = event[0].get('States', list())
+        if len(event) == 0:
+            return event
+        event[0] = binascii.a2b_hex(event[0]).decode('ascii')
+        event[1] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(
+            int(''.join(reversed([event[1][i:i + 2] for i in range(0, len(event[1]), 2)])), 16)))
+        return event
