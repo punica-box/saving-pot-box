@@ -181,6 +181,7 @@ def saving_ont(from_acct, amount):
         saving_amount = Get(CTX, saving_amount_key)
         saving_amount = add(saving_amount, amount)
         Put(CTX, saving_amount_key, saving_amount)
+        Notify(['saving ont', from_acct, amount])
     else:
         revert()
 
@@ -195,6 +196,7 @@ def saving_ong(from_acct, amount):
         saving_amount = Get(CTX, saving_amount_key)
         saving_amount = add(saving_amount, amount)
         Put(CTX, saving_amount_key, saving_amount)
+        Notify(['saving ong', from_acct, amount])
     else:
         revert()
 
@@ -208,6 +210,7 @@ def take_ont_out(to_acct):
         saving_amount = Get(CTX, saving_amount_key)
         transfer_ont(SAVING_POT_ADDRESS, to_acct, saving_amount)
         Delete(CTX, saving_amount_key)
+        Notify(['take ont out', to_acct, saving_amount])
     else:
         revert()
 
@@ -221,5 +224,6 @@ def take_ong_out(to_acct):
         saving_amount = Get(CTX, saving_amount_key)
         transfer_ong(SAVING_POT_ADDRESS, to_acct, saving_amount)
         Delete(CTX, saving_amount_key)
+        Notify(['take ong out', to_acct, saving_amount])
     else:
         revert()
