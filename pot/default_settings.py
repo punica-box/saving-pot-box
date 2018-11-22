@@ -18,7 +18,7 @@ TEMPLATE_FOLDER = os.path.join(STATIC_FOLDER, 'templates')
 GAS_LIMIT = 20000000
 GAS_PRICE = 500
 ONT_RPC_ADDRESS = 'http://polaris3.ont.io:20336'
-CONTRACT_ADDRESS_HEX = '9560fa0de1fe4440d29d032323698da935aea585'
+CONTRACT_ADDRESS_HEX = 'a5dbe898e263b994ac6f3afdeba19d7c25b56bbd'
 ONTOLOGY = OntologySdk()
 ONTOLOGY.rpc.set_address(ONT_RPC_ADDRESS)
 with open(os.path.join(CONTRACTS_FOLDER, 'saving-pot.abi.json')) as f:
