@@ -117,6 +117,30 @@ class InvokeSavingPot(object):
             else:
                 raise PotException(PotError.create_ong_pot_failed)
 
+    def saving_ont(self, from_acct: Account, amount: int, gas_limit: int, gas_price: int):
+        saving_ont = self.__abi_info.get_function('saving_ont')
+        saving_ont.set_params_value((from_acct.get_address().to_array(), amount))
+        try:
+            return self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
+                                                        gas_limit, gas_price, saving_ont, False)
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
+    def saving_ong(self, from_acct: Account, amount: int, gas_limit: int, gas_price: int):
+        saving_ong = self.__abi_info.get_function('saving_ong')
+        saving_ong.set_params_value((from_acct.get_address().to_array(), amount))
+        try:
+            return self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, from_acct, from_acct,
+                                                        gas_limit, gas_price, saving_ong, False)
+        except SDKException as e:
+            if 'vm execute state fault' in e.args[1]:
+                return False
+            else:
+                raise PotException(PotError.create_ong_pot_failed)
+
     def take_ong_out(self, from_acct: Account, gas_limit: int, gas_price: int):
         take_ong_out = self.__abi_info.get_function('take_ong_out')
         take_ong_out.set_params_value((from_acct.get_address().to_array(),))

@@ -33,4 +33,8 @@ class PotError(object):
 
     query_create_pot_event_failed = get_error.__func__(3000, 'query pot event failed')
 
-    take_ong_out_failed = get_error.__func__(4000, 'take ong out failed')
+    saving_ont_failed = get_error.__func__(4000, 'saving ont failed')
+    saving_ong_failed = get_error.__func__(40001, 'saving ong failed')
+
+    take_ont_out_failed = get_error.__func__(5000, 'take ont out failed')
+    take_ong_out_failed = get_error.__func__(5001, 'take ong out failed')

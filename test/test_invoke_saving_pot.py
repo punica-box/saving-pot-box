@@ -54,6 +54,25 @@ class TestInvokeSavingPot(unittest.TestCase):
         data = saving_pot.get_ong_pot_tx_hash(acct.get_address().to_array())
         self.assertEqual(tx_hash, data)
 
+    def test_saving_ont(self):
+        amount = 1
+        balance1 = ontology.rpc.get_balance(acct.get_address_base58())
+        tx_hash = saving_pot.saving_ont(acct, amount, GAS_LIMIT, GAS_PRICE)
+        self.assertEqual(64, len(tx_hash))
+        time.sleep(6)
+        print(ontology.rpc.get_smart_contract_event_by_tx_hash(tx_hash))
+        balance2 = ontology.rpc.get_balance(acct.get_address_base58())
+        self.assertEqual(balance1, balance2 + 1)
+
+    def test_saving_ong(self):
+        amount = 1
+        print(ontology.rpc.get_balance(acct.get_address_base58()))
+        tx_hash = saving_pot.saving_ong(acct, amount, GAS_LIMIT, GAS_PRICE)
+        self.assertEqual(64, len(tx_hash))
+        time.sleep(6)
+        print(ontology.rpc.get_smart_contract_event_by_tx_hash(tx_hash))
+        print(ontology.rpc.get_balance(acct.get_address_base58()))
+
     def test_take_ont_out(self):
         tx_hash = saving_pot.take_ong_out(acct, GAS_LIMIT, GAS_PRICE)
         print(tx_hash)
