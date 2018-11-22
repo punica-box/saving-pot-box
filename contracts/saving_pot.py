@@ -111,7 +111,6 @@ def put_ont_pot_tx_hash(from_acct, tx_hash):
 
 
 def get_ont_pot_tx_hash(from_acct):
-    require_witness(from_acct)
     saving_tx_hash_key = concat_key(SAVING_ONT_TX_HASH_PREFIX, from_acct)
     return Get(CTX, saving_tx_hash_key)
 
@@ -123,7 +122,6 @@ def put_ong_pot_tx_hash(from_acct, tx_hash):
 
 
 def get_ong_pot_tx_hash(from_acct):
-    require_witness(from_acct)
     saving_tx_hash_key = concat_key(SAVING_ONG_TX_HASH_PREFIX, from_acct)
     return Get(CTX, saving_tx_hash_key)
 
