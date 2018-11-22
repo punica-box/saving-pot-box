@@ -13,6 +13,8 @@ SAVING_ONT_TIME_PREFIX = 'STT'
 SAVING_ONT_AMOUNT_PREFIX = 'STA'
 SAVING_ONG_TIME_PREFIX = 'SGT'
 SAVING_ONG_AMOUNT_PREFIX = 'SGA'
+SAVING_ONT_TX_HASH_PREFIX = 'ONTTH'
+SAVING_ONG_TX_HASH_PREFIX = 'ONGTH'
 
 
 def main(operation, args):
@@ -27,11 +29,19 @@ def main(operation, args):
     elif operation == 'query_ont_pot_saving_time':
         return query_ont_pot_saving_time(args[0])
     elif operation == 'query_ong_pot_saving_time':
-        return query_ont_pot_saving_time(args[0])
+        return query_ong_pot_saving_time(args[0])
     elif operation == 'take_ont_out':
         return take_ont_out(args[0])
     elif operation == 'take_ong_out':
         return take_ong_out(args[0])
+    elif operation == 'put_ont_pot_tx_hash':
+        return put_ont_pot_tx_hash(args[0], args[1])
+    elif operation == 'get_ont_pot_tx_hash':
+        return get_ont_pot_tx_hash(args[0])
+    elif operation == 'put_ong_pot_tx_hash':
+        return put_ong_pot_tx_hash(args[0], args[1])
+    elif operation == 'get_ong_pot_tx_hash':
+        return get_ong_pot_tx_hash(args[0])
     else:
         return revert()
 
@@ -94,48 +104,72 @@ def transfer_ong(from_acct, to_acct, amount):
         return False
 
 
+def put_ont_pot_tx_hash(from_acct, tx_hash):
+    require_witness(from_acct)
+    saving_tx_hash_key = concat_key(SAVING_ONT_TX_HASH_PREFIX, from_acct)
+    Put(CTX, saving_tx_hash_key, tx_hash)
+
+
+def get_ont_pot_tx_hash(from_acct):
+    require_witness(from_acct)
+    saving_tx_hash_key = concat_key(SAVING_ONT_TX_HASH_PREFIX, from_acct)
+    return Get(CTX, saving_tx_hash_key)
+
+
+def put_ong_pot_tx_hash(from_acct, tx_hash):
+    require_witness(from_acct)
+    saving_tx_hash_key = concat_key(SAVING_ONG_TX_HASH_PREFIX, from_acct)
+    Put(CTX, saving_tx_hash_key, tx_hash)
+
+
+def get_ong_pot_tx_hash(from_acct):
+    require_witness(from_acct)
+    saving_tx_hash_key = concat_key(SAVING_ONG_TX_HASH_PREFIX, from_acct)
+    return Get(CTX, saving_tx_hash_key)
+
+
 def create_ont_pot(from_acct, time_limit):
     require_witness(from_acct)
     saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, from_acct)
-    if not Get(CTX, saving_time_key):
-        saving_time = GetTime() + time_limit
+    if Get(CTX, saving_time_key):
+        revert()
+    else:
+        saving_time = add(GetTime(), time_limit)
         Put(CTX, saving_time_key, time_limit)
         Notify(['saving time', saving_time])
         saving_amount_key = concat_key(SAVING_ONT_AMOUNT_PREFIX, from_acct)
         Put(CTX, saving_amount_key, 0)
-    else:
-        revert()
-
-
-def query_ont_pot_saving_time(from_acct):
-    saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, from_acct)
-    saving_time = Get(saving_time_key)
-    if not saving_time:
-        return 0
-    else:
-        return saving_time
-
-
-def query_ong_pot_saving_time(from_acct):
-    saving_time_key = concat_key(SAVING_ONG_TIME_PREFIX, from_acct)
-    saving_time = Get(saving_time_key)
-    if not saving_time:
-        return 0
-    else:
-        return saving_time
 
 
 def create_ong_pot(from_acct, time_limit):
     require_witness(from_acct)
     saving_time_key = concat_key(SAVING_ONG_TIME_PREFIX, from_acct)
-    if not Get(CTX, saving_time_key):
-        saving_time = GetTime() + time_limit
+    if Get(CTX, saving_time_key):
+        revert()
+    else:
+        saving_time = add(GetTime(), time_limit)
         Put(CTX, saving_time_key, time_limit)
         Notify(['saving time', saving_time])
         saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, from_acct)
         Put(CTX, saving_amount_key, 0)
+
+
+def query_ont_pot_saving_time(from_acct):
+    saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, from_acct)
+    saving_time = Get(CTX, saving_time_key)
+    if saving_time:
+        return saving_time
     else:
-        revert()
+        return 0
+
+
+def query_ong_pot_saving_time(from_acct):
+    saving_time_key = concat_key(SAVING_ONG_TIME_PREFIX, from_acct)
+    saving_time = Get(CTX, saving_time_key)
+    if saving_time:
+        return saving_time
+    else:
+        return 0
 
 
 def saving_ont(from_acct, amount):
@@ -147,7 +181,7 @@ def saving_ont(from_acct, amount):
         transfer_ont(from_acct, SAVING_POT_ADDRESS, amount)
         saving_amount_key = concat_key(SAVING_ONT_AMOUNT_PREFIX, from_acct)
         saving_amount = Get(CTX, saving_amount_key)
-        saving_amount += amount
+        saving_amount = add(saving_amount, amount)
         Put(CTX, saving_amount_key, saving_amount)
     else:
         revert()
@@ -161,7 +195,7 @@ def saving_ong(from_acct, amount):
         transfer_ong(from_acct, SAVING_POT_ADDRESS, amount)
         saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, from_acct)
         saving_amount = Get(CTX, saving_amount_key)
-        saving_amount += amount
+        saving_amount = add(saving_amount, amount)
         Put(CTX, saving_amount_key, saving_amount)
     else:
         revert()
@@ -171,12 +205,11 @@ def take_ont_out(to_acct):
     require_witness(to_acct)
     saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, to_acct)
     saving_time = Get(CTX, saving_time_key)
-    if saving_time > GetTime():
+    if saving_time < GetTime():
         saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, to_acct)
         saving_amount = Get(CTX, saving_amount_key)
         transfer_ont(SAVING_POT_ADDRESS, to_acct, saving_amount)
-        saving_amount = 0
-        Put(CTX, saving_amount_key, saving_amount)
+        Delete(CTX, saving_amount_key)
     else:
         revert()
 
@@ -185,11 +218,10 @@ def take_ong_out(to_acct):
     require_witness(to_acct)
     saving_time_key = concat_key(SAVING_ONT_TIME_PREFIX, to_acct)
     saving_time = Get(CTX, saving_time_key)
-    if saving_time > GetTime():
+    if saving_time < GetTime():
         saving_amount_key = concat_key(SAVING_ONG_AMOUNT_PREFIX, to_acct)
         saving_amount = Get(CTX, saving_amount_key)
         transfer_ong(SAVING_POT_ADDRESS, to_acct, saving_amount)
-        saving_amount = 0
-        Put(CTX, saving_amount_key, saving_amount)
+        Delete(CTX, saving_amount_key)
     else:
         revert()
