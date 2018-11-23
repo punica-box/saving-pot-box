@@ -4,14 +4,17 @@ new Vue({
         return {
             loginDialogVisible: true,
             loginForm: {
-                identityOptions: [],
-                identitySelected: [],
-                ontIdSelected: '',
-                identityPass: ''
-            }
+                acctPass: ''
+            },
+            settingForm: settingForm
         }
     },
     methods: {
+        getAccounts: getAccounts,
+        createAccount: createAccount,
+        networkChange: networkChange,
+        accountChange: accountChange,
+        getDefaultAccountData: getDefaultAccountData,
         reloadLoginPage() {
             window.location.reload();
         },
@@ -41,72 +44,15 @@ new Vue({
                 console.log(error);
             }
         },
-        async changeToFirstIdentity() {
-            if (this.loginForm.identitySelected.length === 0 && this.loginForm.identityOptions.length !== 0) {
-                let firstOntId = this.loginForm.identityOptions[0].value;
-                this.loginForm.identitySelected = [firstOntId];
-                this.loginForm.ontIdSelected = firstOntId;
-            }
-        },
-        async createIdentity() {
-            let label = await this.$prompt('Identity Label:', 'Create Identity', {
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Cancel',
-                closeOnClickModal: false,
-                inputPattern: /\S{1,}/,
-                inputErrorMessage: 'invalid label'
-            }).catch(() => {
-                this.$message.warning('Create canceled');
-            });
-            if (label === undefined) {
-                return;
-            }
-            let password = await this.$prompt('Identity Password', 'Create Account', {
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Cancel',
-                closeOnClickModal: false,
-                inputPattern: /\S{1,}/,
-                inputType: 'password',
-                inputErrorMessage: 'invalid password'
-            }).catch(() => {
-                this.$message.warning('Import canceled');
-            });
-            if (password === undefined) {
-                return;
-            }
-            try {
-                let create_identity_url = Flask.url_for('create_identity');
-                let response = await axios.post(create_identity_url, {
-                    'label': label.value,
-                    'password': password.value
-                });
-                this.loginForm.newIdentityHexPrivateKey = response.data.hex_private_key;
-                this.loginForm.newIdentityPrivateKeyDialogVisible = true;
-                await this.getIdentities();
-            } catch (error) {
-                console.log(error);
-            }
-        },
-        async identityChange(value) {
-            try {
-                let url = Flask.url_for('identity_change');
-                let response = await axios.post(url, {'ont_id_selected': value[0]});
-                this.loginForm.ontIdSelected = value[0];
-                this.$message({
-                    type: 'success',
-                    message: response.data.result,
-                    duration: 3000
-                })
-            } catch (error) {
-                this.$message({
-                    message: error.response.data.result,
-                    type: 'error',
-                    duration: 3000
-                })
+        async changeToFirstAccount() {
+            if (this.settingForm.accountSelected.length === 0 && this.settingForm.accountOptions.length !== 0) {
+                let firstAccount = this.settingForm.accountOptions[0].value;
+                this.settingForm.accountSelected = [firstAccount];
+                this.settingForm.b58AddressSelected = firstAccount;
             }
         },
         async login() {
-            if (this.loginForm.identityPass === '') {
+            if (this.loginForm.acctPass === '') {
                 this.$message({
                     type: 'error',
                     message: 'Please input password',
@@ -114,12 +60,12 @@ new Vue({
                 });
                 return
             }
-            let unlock_identity_url = Flask.url_for('unlock_identity');
+            let unlock_acct_url = Flask.url_for('unlock_account');
             let redirect_url = '';
             try {
-                let response = await axios.post(unlock_identity_url, {
-                    'ont_id_selected': this.loginForm.ontIdSelected,
-                    'ont_id_password': this.loginForm.identityPass
+                let response = await axios.post(unlock_acct_url, {
+                    'b58_address_selected': this.settingForm.b58AddressSelected,
+                    'acct_password': this.loginForm.acctPass
                 });
                 redirect_url = response.data.redirect_url;
                 this.$message({
@@ -129,17 +75,19 @@ new Vue({
                 });
             } catch (error) {
                 redirect_url = error.response.data.redirect_url;
-                this.$message({
+                await this.$message({
                     type: 'error',
                     message: error.response.data.result,
                     duration: 3000
                 });
             }
+            console.log(redirect_url);
             window.location.replace(redirect_url);
         }
     },
     async created() {
-        await this.getIdentities();
-        await this.changeToFirstIdentity();
+        await this.getAccounts();
+        await this.getDefaultAccountData();
+        await this.changeToFirstAccount();
     }
 });
