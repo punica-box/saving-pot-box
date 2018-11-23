@@ -2,7 +2,9 @@ new Vue({
     el: '#vue-app',
     data: function () {
         return {
-            labelPosition: 'right',
+            ontBankForm: ontBankForm,
+            ongBankForm: ongBankForm,
+
             uploadDialogVisible: uploadDialogVisible,
             uploadForm: uploadForm,
             unlockDialogVisible: true,
@@ -16,6 +18,8 @@ new Vue({
         }
     },
     methods: {
+        reloadPotPage: reloadPotPage,
+
         beforeUpload: beforeUpload,
         submitUpload: submitUpload,
         unlockWalletAccount: unlockWalletAccount,
@@ -26,17 +30,11 @@ new Vue({
         getAccounts: getAccounts,
         queryBalance: queryBalance,
         queryEvent: queryEvent,
-        getIdentities: getIdentities,
         importAccount: importAccount,
         removeAccount: removeAccount,
         createAccount: createAccount,
         clearNewAccountHexPrivateKey: clearNewAccountHexPrivateKey,
-        clearNewIdentityHexPrivateKey: clearNewIdentityHexPrivateKey,
-        createIdentity: createIdentity,
-        importIdentity: importIdentity,
-        removeIdentity: removeIdentity,
         accountChange: accountChange,
-        identityChange: identityChange,
         networkChange: networkChange,
         changeContract: changeContract,
         getContractAddress: getContractAddress,
@@ -57,7 +55,6 @@ new Vue({
                 if (this.isSwitchToSettings === true) {
                     this.isSwitchToSettings = false;
                     await this.getAccounts();
-                    await this.getIdentities();
                     await this.getContractAddress();
                     await this.getDefaultAccountData();
                     await this.getDefaultIdentityData();
@@ -66,13 +63,11 @@ new Vue({
             else if (tab.label === 'Collapse Album') {
                 this.isSwitchToSettings = true;
                 await this.getAccounts();
-                await this.getIdentities();
                 await this.getAlbumArray();
             }
             else if (tab.label === 'Card Album') {
                 this.isSwitchToSettings = true;
                 await this.getAccounts();
-                await this.getIdentities();
                 await this.getAlbumArray();
             }
             else {
@@ -81,9 +76,7 @@ new Vue({
         }
     },
     async created() {
-        await this.getAlbumArray();
         await this.getAccounts();
         await this.getDefaultAccountData();
-        await this.getDefaultIdentityData();
     }
 });

@@ -2,7 +2,7 @@
 <html xmlns="">
 <head>
     <meta charset="UTF-8">
-    <title>IPAlbum - A Distributed Album</title>
+    <title>Saving Pot - Many a Little Makes a Mickle</title>
     <!-- import CSS -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui@2.4.6/lib/theme-chalk/index.css">
     {{ JSGlue.include() }}
@@ -26,24 +26,53 @@
             width="40%"
             :close-on-click-modal="false"
             :before-close="handleLoginDialogClose">
-        <el-row :gutter="25"><img src="static/favicon.jpg" height="200px" alt=""></el-row>
+        <el-row :gutter="25">
+            <el-col :span="8">
+                <img src="static/login1.png" height="200px" alt="">
+            </el-col>
+            <el-col :span="8">
+                <img src="static/login2.png" height="200px" alt="">
+            </el-col>
+            <el-col :span="8">
+                <img src="static/login3.png" height="200px" alt="">
+            </el-col>
+        </el-row>
         <el-form :model="loginForm" status-icon ref="loginForm" label-width="120px"
                  class="demo-ruleForm">
             <el-row :gutter="25">
                 <el-col :span="10">
-                    <el-form-item label="ONT ID">
+                    <el-form-item label="Network">
                         <el-cascader
                                 expand-trigger="hover"
                                 filterable
-                                :options="loginForm.identityOptions"
-                                v-model="loginForm.identitySelected"
-                                @change="identityChange">
+                                :options="settingForm.networkOptions"
+                                v-model="settingForm.networkSelected"
+                                @change="networkChange">
                         </el-cascader>
                     </el-form-item>
                 </el-col>
                 <el-col :span="14">
                     <el-input
-                            v-model="loginForm.ontIdSelected"
+                            v-model="settingForm.networkSelected[0]"
+                            :disabled="true">
+                    </el-input>
+                </el-col>
+            </el-row>
+            <el-row :gutter="25">
+                <el-col :span="10">
+                    <el-form-item label="Account">
+                        <el-cascader
+                                expand-trigger="hover"
+                                filterable
+                                :options="settingForm.accountOptions"
+                                v-model="settingForm.accountSelected"
+                                @change="accountChange">
+                        </el-cascader>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="14">
+                    <el-input
+                            v-model="settingForm.b58AddressSelected"
                             :disabled="true">
                     </el-input>
                 </el-col>
@@ -51,7 +80,7 @@
             <el-row>
                 <el-form-item label="Password" prop="pass">
                     <div class="block" style="margin-bottom: 15px;">
-                        <el-input suffix-icon="el-icon-edit-outline" type="password" v-model="loginForm.identityPass">
+                        <el-input suffix-icon="el-icon-edit-outline" type="password" v-model="loginForm.acctPass">
                         </el-input>
                     </div>
                 </el-form-item>
@@ -59,7 +88,7 @@
         </el-form>
         <span slot="footer" class="dialog-footer">
                         <el-button type="primary" @click="reloadLoginPage">Reload</el-button>
-            <el-button type="primary" @click="createIdentity">Create</el-button>
+            <el-button type="primary" @click="createAccount">Create</el-button>
             <el-button type="primary" @click="login">Login</el-button>
         </span>
     </el-dialog>
@@ -71,5 +100,6 @@
 <!-- import JavaScript -->
 <script src="https://unpkg.com/element-ui@2.4.6/lib/index.js"></script>
 <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='js/dapp-setting.js') }}"></script>
 <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </html>

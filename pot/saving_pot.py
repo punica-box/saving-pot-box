@@ -45,12 +45,11 @@ def ensure_remove_dir_if_exists(path):
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
-    # global default_identity_account
-    # if not isinstance(default_identity_account, Account):
-    #     return redirect('login')
-    # else:
-    #     return render_template('index.html')
+    global default_wallet_account
+    if not isinstance(default_wallet_account, Account):
+        return redirect('login')
+    else:
+        return render_template('index.html')
 
 
 @app.route('/favicon.ico')
@@ -60,7 +59,7 @@ def favicon():
 
 @app.route('/login')
 def login():
-    if isinstance(default_identity_account, Account):
+    if isinstance(default_wallet_account, Account):
         return redirect('')
     else:
         return render_template('login.html')
@@ -92,56 +91,29 @@ def get_default_identity_data():
         return json.jsonify({'result': 'Wallet manager error'}), 501
 
 
-@app.route('/unlock_identity', methods=['POST'])
-def unlock_identity():
-    ont_id_selected = request.json.get('ont_id_selected')
-    ont_id_password = request.json.get('ont_id_password')
-    global default_identity_account
+@app.route('/unlock_account', methods=['POST'])
+def unlock_account():
     try:
-        default_identity_account = app.config['WALLET_MANAGER'].get_account(ont_id_selected, ont_id_password)
+        print(request)
+        a = request
+        b58_address_selected = request.json.get('b58_address_selected')
+        acct_password = request.json.get('acct_password')
+    except AttributeError as e:
+        redirect_url = request.url.replace('unlock_account', '')
+        return json.jsonify({'result': e.args, 'redirect_url': redirect_url}), 500
+    global default_wallet_account
+    try:
+        default_wallet_account = app.config['WALLET_MANAGER'].get_account(b58_address_selected, acct_password)
     except SDKException as e:
-        redirect_url = request.url.replace('unlock_identity', 'login')
-        return json.jsonify({'result': e.args[1], 'redirect_url': redirect_url}), 500
-    if isinstance(default_identity_account, Account):
-        msg = ''.join(['unlock ', ont_id_selected, ' successful!'])
-        redirect_url = request.url.replace('unlock_identity', '')
+        redirect_url = request.url.replace('unlock_account', 'login')
+        return json.jsonify({'result': e.args[1], 'redirect_url': redirect_url}), 501
+    if isinstance(default_wallet_account, Account):
+        msg = ''.join(['unlock ', b58_address_selected, ' successful!'])
+        redirect_url = request.url.replace('unlock_account', '')
         return json.jsonify({'result': msg, 'redirect_url': redirect_url}), 200
     else:
-        redirect_url = request.url.replace('unlock_identity', 'login')
-        return json.jsonify({'result': 'unlock failed!', 'redirect_url': redirect_url}), 501
-
-
-@app.route('/get_album_array')
-def get_album_array():
-    global default_identity_account
-    if not isinstance(default_identity_account, Account):
-        return json.jsonify({'result': 'default identity is locked'}), 500
-    item_list = get_item_list_from_contract(default_identity_account)
-    get_album_from_ipfs(item_list)
-    album_img = os.listdir(app.config['ALBUM_FOLDER'])
-    for index in range(len(album_img)):
-        album_img[index] = ''.join(['/static/album/', album_img[index]])
-    return json.jsonify({'result': album_img}), 200
-
-
-@app.route('/upload_file', methods=['POST'])
-def upload_file():
-    file = request.files['file']
-    global default_identity_account
-    global default_wallet_account
-    if not isinstance(default_identity_account, Account):
-        return json.jsonify({'result': 'default identity is locked'}), 500
-    if not isinstance(default_wallet_account, Account):
-        return json.jsonify({'result': 'default account is locked'}), 501
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        img_path = os.path.join(app.config['ASSETS_FOLDER'], filename)
-        file.save(img_path)
-        tx_hash = add_assets_to_ipfs(img_path, default_identity_account, default_wallet_account)
-        remove_file_if_exists(img_path)
-        return json.jsonify({'result': filename, 'tx_hash': tx_hash}), 200
-    else:
-        return json.jsonify({'result': 'file is not allowed'}), 502
+        redirect_url = request.url.replace('unlock_account', 'login')
+        return json.jsonify({'result': 'unlock failed!', 'redirect_url': redirect_url}), 502
 
 
 @app.route('/query_balance', methods=['POST'])
