@@ -5,7 +5,7 @@
     <title>Saving Pot - Many a Little Makes a Mickle</title>
     <!-- import CSS -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui@2.4.6/lib/theme-chalk/index.css">
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_933331_nhb6r668hdp.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_933331_ozuz74zwk.css">
 
     {{ JSGlue.include() }}
     <!-- import favicon -->
@@ -41,10 +41,13 @@
                                     </el-form-item>
                                     <el-button-group>
                                         <el-button type="primary" icon="iconfont el-icon-third-piggybank"
-                                                   @click="viewOriginalImg(item)"></el-button>
+                                                   @click="createOntPot">Create</el-button>
+                                        <el-button type="primary" icon="iconfont el-icon-third-deposit"
+                                                   @click="savingOnt">Deposit</el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-md-hammer"
-                                                   @click="shareIpfsAddress(item)"></el-button>
-                                        <el-button type="primary" icon="iconfont el-icon-third-querylist"></el-button>
+                                                   @click="takeOntOut">Withdraw</el-button>
+                                        <el-button type="primary" icon="iconfont el-icon-third-querylist"
+                                                   @click="queryOntPotInfo">Query</el-button>
                                     </el-button-group>
                                 </el-form>
                             </div>
@@ -74,10 +77,13 @@
                                     </el-form-item>
                                     <el-button-group>
                                         <el-button type="primary" icon="iconfont el-icon-third-piggybank"
-                                                   @click="viewOriginalImg(item)"></el-button>
+                                                   @click="createOngPot">Create</el-button>
+                                        <el-button type="primary" icon="iconfont el-icon-third-deposit"
+                                                   @click="savingOng">Deposit</el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-md-hammer"
-                                                   @click="shareIpfsAddress(item)"></el-button>
-                                        <el-button type="primary" icon="iconfont el-icon-third-querylist"></el-button>
+                                                   @click="takeOngOut">Withdraw</el-button>
+                                        <el-button type="primary" icon="iconfont el-icon-third-querylist"
+                                                   @click="queryOngPotInfo">Query</el-button>
                                     </el-button-group>
                                 </el-form>
                             </div>

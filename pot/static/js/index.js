@@ -19,14 +19,16 @@ new Vue({
     },
     methods: {
         reloadPotPage: reloadPotPage,
+        createOntPot: createOntPot,
+        savingOnt: savingOnt,
+        takeOntOut: takeOntOut,
+        queryOntPotInfo: queryOntPotInfo,
+        createOngPot: createOngPot,
+        savingOng: savingOng,
+        takeOngOut: takeOngOut,
+        queryOngPotInfo: queryOngPotInfo,
 
-        beforeUpload: beforeUpload,
-        submitUpload: submitUpload,
         unlockWalletAccount: unlockWalletAccount,
-        handleUploadSuccess: handleUploadSuccess,
-        handleUploadError: handleUploadError,
-        viewOriginalImg: viewOriginalImg,
-        shareIpfsAddress: shareIpfsAddress,
         getAccounts: getAccounts,
         queryBalance: queryBalance,
         queryEvent: queryEvent,
@@ -40,7 +42,6 @@ new Vue({
         getContractAddress: getContractAddress,
         isDefaultWalletAccountUnlock: isDefaultWalletAccountUnlock,
         getDefaultAccountData: getDefaultAccountData,
-        getDefaultIdentityData: getDefaultIdentityData,
         async getAlbumArray() {
             let url = Flask.url_for('get_album_array');
             try {
