@@ -4,7 +4,6 @@
 import os
 import stat
 import shutil
-import binascii
 
 from flask_jsglue import JSGlue
 from flask import Flask, request, json, send_from_directory, render_template, redirect, url_for
@@ -14,6 +13,8 @@ from ontology.account.account import Account
 from ontology.exception.exception import SDKException
 from ontology.wallet.wallet_manager import WalletManager
 
+from invoke_saving_pot import InvokeSavingPot
+
 static_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 template_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask('Saving-Pot', static_folder=static_folder, template_folder=template_folder)
@@ -22,6 +23,7 @@ jsglue = JSGlue()
 jsglue.init_app(app)
 default_identity_account = None
 default_wallet_account = None
+saving_pot = InvokeSavingPot(app.config['ONTOLOGY'], app.config['CONTRACT_ABI'], app.config['CONTRACT_ADDRESS_HEX'])
 
 
 def remove_file_if_exists(path):
@@ -65,6 +67,56 @@ def login():
         return render_template('login.html')
 
 
+def ensure_login():
+    if not isinstance(default_wallet_account, Account):
+        return redirect('login')
+
+
+@app.route('/create_ont_pot', methods=['POST'])
+def create_ont_pot():
+    global default_wallet_account
+    if not isinstance(default_wallet_account, Account):
+        redirect_url = request.url.replace('create_ont_pot', 'login')
+        return json.jsonify({'result': 'Account locked', 'redirect_url': redirect_url}), 500
+    time_limit = int(request.json.get('time_limit'))
+    tx_hash = saving_pot.create_ont_pot(default_wallet_account, time_limit, app.config['GAS_LIMIT'],
+                                        app.config['GAS_PRICE'])
+    if isinstance(tx_hash, bool):
+        return json.jsonify({'result': 'The ont pot has created!'}), 501
+    if len(tx_hash) != 64:
+        return json.jsonify({'result': tx_hash}), 502
+    tx_hash = saving_pot.put_ont_pot_tx_hash(default_wallet_account, tx_hash, app.config['GAS_LIMIT'],
+                                             app.config['GAS_PRICE'])
+    if len(tx_hash) != 64:
+        return json.jsonify({'result': tx_hash}), 503
+    return json.jsonify({'result': 'Create ont pot successfully!'}), 200
+
+
+@app.route('/create_ong_pot', methods=['POST'])
+def create_ong_pot():
+    global default_wallet_account
+    if not isinstance(default_wallet_account, Account):
+        redirect_url = request.url.replace('create_ont_pot', 'login')
+        return json.jsonify({'result': 'Account locked', 'redirect_url': redirect_url}), 500
+    time_limit = int(request.json.get('time_limit'))
+    tx_hash = saving_pot.create_ong_pot(default_wallet_account, time_limit, app.config['GAS_LIMIT'],
+                                        app.config['GAS_PRICE'])
+    if isinstance(tx_hash, bool):
+        return json.jsonify({'result': 'The ont pot has created!'}), 501
+    if len(tx_hash) != 64:
+        return json.jsonify({'result': tx_hash}), 502
+    tx_hash = saving_pot.put_ong_pot_tx_hash(default_wallet_account, tx_hash, app.config['GAS_LIMIT'],
+                                             app.config['GAS_PRICE'])
+    if len(tx_hash) != 64:
+        return json.jsonify({'result': tx_hash}), 503
+    return json.jsonify({'result': 'Create ont pot successfully!'}), 200
+
+
+@app.route('/saving_ont', methods=['POST'])
+def saving_ont():
+    pass
+
+
 @app.route('/get_default_wallet_account_data')
 def get_default_wallet_account_data():
     if isinstance(app.config['WALLET_MANAGER'], WalletManager):
@@ -78,24 +130,9 @@ def get_default_wallet_account_data():
     return json.jsonify({'result': 'WalletManager error'}), 501
 
 
-@app.route('/get_default_identity_data', methods=['GET'])
-def get_default_identity_data():
-    wallet_manager = app.config['WALLET_MANAGER']
-    if isinstance(wallet_manager, WalletManager):
-        try:
-            default_identity = wallet_manager.get_default_identity()
-            return json.jsonify({'label': default_identity.label, 'ont_id': default_identity.ont_id}), 200
-        except SDKException as e:
-            return json.jsonify({'result': e.args[1]}), 500
-    else:
-        return json.jsonify({'result': 'Wallet manager error'}), 501
-
-
 @app.route('/unlock_account', methods=['POST'])
 def unlock_account():
     try:
-        print(request)
-        a = request
         b58_address_selected = request.json.get('b58_address_selected')
         acct_password = request.json.get('acct_password')
     except AttributeError as e:

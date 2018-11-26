@@ -49,18 +49,6 @@ let getDefaultAccountData = async function () {
     }
 };
 
-let getDefaultIdentityData = async function () {
-    let url = Flask.url_for('get_default_identity_data');
-    try {
-        let response = await axios.get(url);
-        let default_ont_id = response.data.ont_id;
-        this.settingForm.ontIdSelected = default_ont_id;
-        this.settingForm.identitySelected = [default_ont_id];
-    } catch (error) {
-        console.log(error);
-    }
-};
-
 let changeContract = async function () {
     let hex_contract_address = await this.$prompt('Paste your contract address here:', 'Change Contract', {
         confirmButtonText: 'OK',
