@@ -15,6 +15,9 @@ new Vue({
         networkChange: networkChange,
         accountChange: accountChange,
         getDefaultAccountData: getDefaultAccountData,
+        async sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        },
         reloadLoginPage() {
             window.location.reload();
         },
@@ -39,8 +42,7 @@ new Vue({
                         label: response.data.result[i].label
                     });
                 }
-            }
-            catch (error) {
+            } catch (error) {
                 console.log(error);
             }
         },
@@ -70,18 +72,20 @@ new Vue({
                 redirect_url = response.data.redirect_url;
                 this.$message({
                     type: 'success',
+                    center: true,
                     message: response.data.result,
                     duration: 3000
                 });
             } catch (error) {
                 redirect_url = error.response.data.redirect_url;
-                await this.$message({
+                this.$message({
                     type: 'error',
+                    center: true,
                     message: error.response.data.result,
                     duration: 3000
                 });
             }
-            console.log(redirect_url);
+            await this.sleep(2000);
             window.location.replace(redirect_url);
         }
     },

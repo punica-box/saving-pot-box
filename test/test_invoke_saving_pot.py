@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import binascii
 import time
 import unittest
 from unittest.mock import patch
 
 from ontology.ont_sdk import OntologySdk
+from ontology.smart_contract.neo_contract.abi.abi_function import AbiFunction
+from ontology.smart_contract.neo_contract.abi.abi_info import AbiInfo
 from ontology.wallet.wallet_manager import WalletManager
 
 from pot.default_settings import (
@@ -22,8 +25,7 @@ remote_rpc_address = 'http://polaris3.ont.io:20336'
 ontology.set_rpc(remote_rpc_address)
 wallet_manager = WalletManager()
 wallet_manager.open_wallet(WALLET_PATH)
-# password = input('password: ')
-password = 'password'
+password = input('password: ')
 gas_limit = 20000000
 gas_price = 500
 acct = wallet_manager.get_account('AKeDu9QW6hfAhwpvCwNNwkEQt1LkUQpBpW', password)
