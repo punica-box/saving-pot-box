@@ -88,6 +88,8 @@ class TestInvokeSavingPot(unittest.TestCase):
         self.assertEqual(60, saving_time)
 
     def test_query_ong_pot_saving_time(self):
+        print(acct.get_address().to_array())
+        print(type(acct.get_address().to_array()))
         saving_time = saving_pot.query_ong_pot_saving_time(acct.get_address().to_array())
         self.assertEqual(60, saving_time)
 
