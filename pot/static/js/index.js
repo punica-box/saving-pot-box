@@ -4,6 +4,7 @@ new Vue({
         return {
             ontBankForm: ontBankForm,
             ongBankForm: ongBankForm,
+            depositOntVisible: depositOntVisible,
 
             isSwitchToSettings: true,
             albumArray: [],
@@ -17,7 +18,13 @@ new Vue({
     methods: {
         reloadPotPage: reloadPotPage,
         createOntPot: createOntPot,
+        queryOntPotDuration: queryOntPotDuration,
+        queryOngPotDuration: queryOngPotDuration,
+        queryOntPotSavingTime: queryOntPotSavingTime,
+        queryOngPotSavingTime: queryOngPotSavingTime,
         savingOnt: savingOnt,
+        submitDepositOntForm: submitDepositOntForm,
+        handleDepositOntClose: handleDepositOntClose,
         takeOntOut: takeOntOut,
         queryOntPotInfo: queryOntPotInfo,
         createOngPot: createOngPot,
@@ -49,7 +56,10 @@ new Vue({
                 }
             } else if (tab.label === 'Saving Pot') {
                 this.isSwitchToSettings = true;
-                await this.getAccounts();
+                this.queryOntPotDuration();
+                this.queryOngPotDuration();
+                this.queryOntPotSavingTime();
+                this.getAccounts();
             } else if (tab.label === 'Information Query') {
                 this.isSwitchToSettings = true;
                 await this.getAccounts();
@@ -59,7 +69,11 @@ new Vue({
         }
     },
     async created() {
-        await this.getAccounts();
-        await this.getDefaultAccountData();
+        this.getAccounts();
+        this.getDefaultAccountData();
+        this.queryOntPotDuration();
+        this.queryOngPotDuration();
+        this.queryOntPotSavingTime();
+        this.queryOngPotSavingTime();
     }
 });

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import binascii
@@ -154,24 +154,27 @@ class InvokeSavingPot(object):
             else:
                 raise PotException(PotError.create_ong_pot_failed)
 
-    def query_ont_pot_saving_time(self, bytearray_address: bytearray) -> int:
+    def query_ont_pot_saving_time(self, address_bytes: bytes) -> int:
         query_function = self.__abi_info.get_function('query_ont_pot_saving_time')
-        query_function.set_params_value((bytearray_address,))
+        query_function.set_params_value((address_bytes,))
         saving_time = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, None, None, 0, 0,
                                                            query_function, True)
         saving_time = int(''.join(reversed([saving_time[i:i + 2] for i in range(0, len(saving_time), 2)])), 16)
         return saving_time
 
-    def query_ong_pot_saving_time(self, bytearray_address: bytearray) -> int:
+    def query_ong_pot_saving_time(self, address_bytes: bytes) -> int:
         query_function = self.__abi_info.get_function('query_ong_pot_saving_time')
-        query_function.set_params_value((bytearray_address,))
+        query_function.set_params_value((address_bytes,))
         saving_time = self.__sdk.neo_vm().send_transaction(self.__contract_address_bytearray, None, None, 0, 0,
                                                            query_function, True)
         saving_time = int(''.join(reversed([saving_time[i:i + 2] for i in range(0, len(saving_time), 2)])), 16)
         return saving_time
 
     def query_create_pot_event(self, tx_hash: str):
-        event = self.__sdk.rpc.get_smart_contract_event_by_tx_hash(tx_hash).get('Notify', list())
+        event = self.__sdk.rpc.get_smart_contract_event_by_tx_hash(tx_hash)
+        if event == '':
+            return list()
+        event = event.get('Notify', list())
         if len(event) == 0:
             return event
         event = event[0].get('States', list())

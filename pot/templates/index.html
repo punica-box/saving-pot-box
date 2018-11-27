@@ -5,18 +5,27 @@
     <title>Saving Pot - Many a Little Makes a Mickle</title>
     <!-- import CSS -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui@2.4.6/lib/theme-chalk/index.css">
-    <link rel="stylesheet" href="https://at.alicdn.com/t/font_933331_ozuz74zwk.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_933331_0z6ma8wbba5.css">
 
     {{ JSGlue.include() }}
     <!-- import favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        .el-select .el-input {
+            width: 240px;
+        }
+
+        .input-with-select .el-input-group__prepend {
+            background-color: #fff;
+        }
+    </style>
 </head>
 <body>
-<div id="vue-app" style="width:1400px; margin:auto">
+<div id="vue-app" style="width:1400px; margin:auto;">
     <el-tabs type="border-card" stretch @tab-click="tabClickHandler">
         <el-tab-pane label="Saving Pot">
             <el-form label-position="right" label-width="150px" :model="settingForm">
-                <el-row :gutter="20">
+                <el-row :gutter="20" style="margin-bottom: 20px;">
                     <el-col :span="12">
                         <el-card shadow="hover">
                             <div slot="header" class="clearfix">
@@ -30,27 +39,57 @@
                                     <el-form-item label=" Amount ">
                                         <el-input
                                                 v-model="ontBankForm.amount"
+                                                suffix-icon="iconfont el-icon-third-ONT"
                                                 :disabled="true">
                                         </el-input>
                                     </el-form-item>
                                     <el-form-item label="Duration">
                                         <el-input
                                                 v-model="ontBankForm.duration"
+                                                suffix-icon="el-icon-date"
+                                                :disabled="true">
+                                        </el-input>
+                                    </el-form-item>
+                                    <el-form-item label="Saving Time">
+                                        <el-input
+                                                v-model="ontBankForm.savingTime"
+                                                suffix-icon="iconfont el-icon-third-time"
                                                 :disabled="true">
                                         </el-input>
                                     </el-form-item>
                                     <el-button-group>
                                         <el-button type="primary" icon="iconfont el-icon-third-piggybank"
-                                                   @click="createOntPot">Create</el-button>
+                                                   @click="createOntPot">Create
+                                        </el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-deposit"
-                                                   @click="savingOnt">Deposit</el-button>
+                                                   @click="savingOnt">Deposit
+                                        </el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-md-hammer"
-                                                   @click="takeOntOut">Withdraw</el-button>
+                                                   @click="takeOntOut">Withdraw
+                                        </el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-querylist"
-                                                   @click="queryOntPotInfo">Query</el-button>
+                                                   @click="queryOntPotInfo">Query
+                                        </el-button>
                                     </el-button-group>
                                 </el-form>
                             </div>
+                            <el-dialog
+                                    title="Deposit"
+                                    :visible.sync="depositOntVisible"
+                                    width="30%"
+                                    :before-close="handleDepositOntClose">
+                                <el-input
+                                        placeholder="Please input the amount of ONT you want to deposit"
+                                        v-model="ontBankForm.depositOntAmount"
+                                        suffix-icon="iconfont el-icon-third-ONT"
+                                        :disabled="false">
+                                    <template slot="prepend">ONT</template>
+                                </el-input>
+                                <span slot="footer" class="dialog-footer">
+                                    <el-button @click="depositOntVisible = false">Cancel</el-button>
+                                    <el-button type="primary" @click="submitDepositOntForm">Confirm</el-button>
+                                </span>
+                            </el-dialog>
                         </el-card>
                     </el-col>
                     <el-col :span="12">
@@ -66,10 +105,61 @@
                                     <el-form-item label=" Amount ">
                                         <el-input
                                                 v-model="ongBankForm.amount"
+                                                suffix-icon="iconfont el-icon-third-ong"
                                                 :disabled="true">
                                         </el-input>
                                     </el-form-item>
                                     <el-form-item label="Duration">
+                                        <el-input
+                                                v-model="ongBankForm.duration"
+                                                suffix-icon="el-icon-date"
+                                                :disabled="true">
+                                        </el-input>
+                                    </el-form-item>
+                                    <el-form-item label="Saving Time">
+                                        <el-input
+                                                v-model="ongBankForm.savingTime"
+                                                suffix-icon="iconfont el-icon-third-time"
+                                                :disabled="true">
+                                        </el-input>
+                                    </el-form-item>
+                                    <el-button-group>
+                                        <el-button type="primary" icon="iconfont el-icon-third-piggybank"
+                                                   @click="createOngPot">Create
+                                        </el-button>
+                                        <el-button type="primary" icon="iconfont el-icon-third-deposit"
+                                                   @click="savingOng">Deposit
+                                        </el-button>
+                                        <el-button type="primary" icon="iconfont el-icon-third-md-hammer"
+                                                   @click="takeOngOut">Withdraw
+                                        </el-button>
+                                        <el-button type="primary" icon="iconfont el-icon-third-querylist"
+                                                   @click="queryOngPotInfo">Query
+                                        </el-button>
+                                    </el-button-group>
+                                </el-form>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+                <el-row :gutter="20" style="margin-bottom: 20px;">
+                    <el-col :span="24">
+                        <el-card shadow="hover">
+                            <div slot="header" class="clearfix">
+                                <span>ONTOLOGY WALLET</span>
+                                <el-button style="float: right; padding: 3px 0" type="text" @click="reloadPotPage">
+                                    Reload
+                                </el-button>
+                            </div>
+                            <div class="text item">
+                                <el-form label-position="right" label-width="120px" :model="ongBankForm">
+                                    <el-form-item label="ONT Balance">
+                                        <el-input
+                                                v-model="ongBankForm.amount"
+                                                :disabled="true">
+                                        </el-input>
+                                    </el-form-item>
+                                    <el-form-item label="ONG Balance">
                                         <el-input
                                                 v-model="ongBankForm.duration"
                                                 :disabled="true">
@@ -77,13 +167,17 @@
                                     </el-form-item>
                                     <el-button-group>
                                         <el-button type="primary" icon="iconfont el-icon-third-piggybank"
-                                                   @click="createOngPot">Create</el-button>
+                                                   @click="createOngPot">Create
+                                        </el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-deposit"
-                                                   @click="savingOng">Deposit</el-button>
+                                                   @click="savingOng">Deposit
+                                        </el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-md-hammer"
-                                                   @click="takeOngOut">Withdraw</el-button>
+                                                   @click="takeOngOut">Withdraw
+                                        </el-button>
                                         <el-button type="primary" icon="iconfont el-icon-third-querylist"
-                                                   @click="queryOngPotInfo">Query</el-button>
+                                                   @click="queryOngPotInfo">Query
+                                        </el-button>
                                     </el-button-group>
                                 </el-form>
                             </div>
@@ -94,140 +188,133 @@
         </el-tab-pane>
 
         <el-tab-pane label="Information Query">
-            <div style="margin-bottom: 15px;">
-                <el-row :gutter="20">
-                    <el-col :span="24">
-                        <el-input
-                                placeholder="Please input TxHash"
-                                type="string"
-                                v-model="eventKey"
-                                class="input-with-select">
-                            <el-select v-model="eventInfoSelect" slot="prepend" placeholder="Select">
-                                <el-option label="State" value="State"/>
-                                </el-option>
-                                <el-option label="GasConsumed" value="GasConsumed"></el-option>
-                                <el-option label="Notify" value="Notify"></el-option>
-                            </el-select>
-                            <el-button slot="append" icon="el-icon-search" @click="queryEvent"></el-button>
-                        </el-input>
-                    </el-col>
-                </el-row>
-            </div>
+            <el-row :gutter="20" style="margin-bottom: 20px;">
+                <el-col :span="24">
+                    <el-input
+                            placeholder="Please input TxHash"
+                            type="string"
+                            v-model="eventKey"
+                            class="input-with-select">
+                        <el-select v-model="eventInfoSelect" slot="prepend" placeholder="Select">
+                            <el-option label="State" value="State"></el-option>
+                            <el-option label="GasConsumed" value="GasConsumed"></el-option>
+                            <el-option label="Notify" value="Notify"></el-option>
+                        </el-select>
+                        <el-button slot="append" icon="el-icon-search" @click="queryEvent"></el-button>
+                    </el-input>
+                </el-col>
+            </el-row>
 
-            <div style="margin-bottom: 15px;">
-                <el-row :gutter="20">
-                    <el-col :span="24">
-                        <el-input
-                                placeholder="Please input base58 encode address"
-                                type="string"
-                                v-model="assetKey"
-                                class="input-with-select">
-                            <el-select v-model="assetSelect" slot="prepend" placeholder="Select">
-                                <el-option label="ONT" value="ONT"></el-option>
-                                <el-option label="ONG" value="ONG"></el-option>
-                            </el-select>
-                            <el-button slot="append" icon="el-icon-search" @click="queryBalance"></el-button>
-                        </el-input>
-                    </el-col>
-                </el-row>
-            </div>
+            <el-row :gutter="20">
+                <el-col :span="24">
+                    <el-input
+                            placeholder="Please input base58 encode address"
+                            type="string"
+                            v-model="assetKey"
+                            class="input-with-select">
+                        <el-select v-model="assetSelect" slot="prepend" placeholder="Select">
+                            <el-option label="ONT" value="ONT"></el-option>
+                            <el-option label="ONG" value="ONG"></el-option>
+                        </el-select>
+                        <el-button slot="append" icon="el-icon-search" @click="queryBalance"></el-button>
+                    </el-input>
+                </el-col>
+            </el-row>
         </el-tab-pane>
 
         <el-tab-pane label="DApp Settings">
-            <div style="margin-bottom: 5px;">
-                <el-form label-position="labelPosition" label-width="150px" :model="settingForm">
-                    <el-row :gutter="20">
-                        <el-col :span="6">
-                            <el-form-item label="Default Network ">
-                                <el-cascader
-                                        expand-trigger="hover"
-                                        filterable
-                                        :options="settingForm.networkOptions"
-                                        v-model="settingForm.networkSelected"
-                                        @change="networkChange">
-                                </el-cascader>
-                            </el-form-item>
-                        </el-col>
+            <el-form label-position="labelPosition" label-width="150px" :model="settingForm">
+                <el-row :gutter="20" style="margin-bottom: 5px;">
+                    <el-col :span="6">
+                        <el-form-item label="Default Network ">
+                            <el-cascader
+                                    expand-trigger="hover"
+                                    filterable
+                                    :options="settingForm.networkOptions"
+                                    v-model="settingForm.networkSelected"
+                                    @change="networkChange">
+                            </el-cascader>
+                        </el-form-item>
+                    </el-col>
 
-                        <el-col :span="12">
-                            <el-form-item label="Contract Address">
-                                <el-input
-                                        v-model="settingForm.contractAddress"
-                                        :disabled="true">
-                                    <template slot="prepend">0x</template>
-                                </el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-button icon="el-icon-edit" type="success" @click.prevent="changeContract">
-                                Change Contract
-                            </el-button>
-                        </el-col>
-                    </el-row>
-
-                    <el-row :gutter="25">
-
-                        <el-col :span="6">
-                            <el-form-item label="Default Account ">
-                                <el-cascader
-                                        expand-trigger="hover"
-                                        filterable
-                                        :options="settingForm.accountOptions"
-                                        v-model="settingForm.accountSelected"
-                                        @change="accountChange">
-                                </el-cascader>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
+                    <el-col :span="12">
+                        <el-form-item label="Contract Address">
                             <el-input
-                                    v-model="settingForm.b58AddressSelected"
+                                    v-model="settingForm.contractAddress"
                                     :disabled="true">
+                                <template slot="prepend">0x</template>
                             </el-input>
-                        </el-col>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-button icon="el-icon-edit" type="success" @click.prevent="changeContract">
+                            Change Contract
+                        </el-button>
+                    </el-col>
+                </el-row>
 
-                        <el-col :span="10">
-                            <div class="grid-content bg-purple">
-                                <el-button-group>
-                                    <el-button icon="el-icon-edit" type="success" @click="createAccount">
-                                        Create Account
-                                    </el-button>
-                                    <el-button icon="el-icon-upload" type="primary" @click="importAccount">
-                                        Import Account
-                                    </el-button>
-                                    <el-button icon="el-icon-delete" type="warning" @click="removeAccount">
-                                        Remove Account
-                                    </el-button>
-                                </el-button-group>
-                                <el-dialog
-                                        title="Create successful"
-                                        width="35%"
-                                        :visible.sync="settingForm.newAccountPrivateKeyDialogVisible"
-                                        :close-on-click-modal="false"
-                                        :before-close="clearNewAccountHexPrivateKey"
-                                        :show-close="false"
-                                        :close-on-press-escape="false">
-                                    <div class="block" style="margin-bottom: 15px;">
-                                        <el-input
-                                                v-model="settingForm.newAccountHexPrivateKey"
-                                                size="small"
-                                                suffix-icon="el-icon-edit-outline"
-                                                :disabled="true">
-                                            <template slot="prepend">private key:</template>
-                                        </el-input>
-                                    </div>
-                                    <span slot="footer" class="dialog-footer">
+                <el-row :gutter="25">
+
+                    <el-col :span="6">
+                        <el-form-item label="Default Account ">
+                            <el-cascader
+                                    expand-trigger="hover"
+                                    filterable
+                                    :options="settingForm.accountOptions"
+                                    v-model="settingForm.accountSelected"
+                                    @change="accountChange">
+                            </el-cascader>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-input
+                                v-model="settingForm.b58AddressSelected"
+                                :disabled="true">
+                        </el-input>
+                    </el-col>
+
+                    <el-col :span="10">
+                        <div class="grid-content bg-purple">
+                            <el-button-group>
+                                <el-button icon="el-icon-edit" type="success" @click="createAccount">
+                                    Create Account
+                                </el-button>
+                                <el-button icon="el-icon-upload" type="primary" @click="importAccount">
+                                    Import Account
+                                </el-button>
+                                <el-button icon="el-icon-delete" type="warning" @click="removeAccount">
+                                    Remove Account
+                                </el-button>
+                            </el-button-group>
+                            <el-dialog
+                                    title="Create successful"
+                                    width="35%"
+                                    :visible.sync="settingForm.newAccountPrivateKeyDialogVisible"
+                                    :close-on-click-modal="false"
+                                    :before-close="clearNewAccountHexPrivateKey"
+                                    :show-close="false"
+                                    :close-on-press-escape="false">
+                                <div class="block" style="margin-bottom: 15px;">
+                                    <el-input
+                                            v-model="settingForm.newAccountHexPrivateKey"
+                                            size="small"
+                                            suffix-icon="el-icon-edit-outline"
+                                            :disabled="true">
+                                        <template slot="prepend">private key:</template>
+                                    </el-input>
+                                </div>
+                                <span slot="footer" class="dialog-footer">
                                         <el-button type="primary"
                                                    @click="settingForm.newAccountPrivateKeyDialogVisible = false">
                                             Confirm
                                         </el-button>
                                     </span>
-                                </el-dialog>
-                            </div>
-                        </el-col>
+                            </el-dialog>
+                        </div>
+                    </el-col>
 
-                    </el-row>
-                </el-form>
-            </div>
+                </el-row>
+            </el-form>
 
         </el-tab-pane>
 

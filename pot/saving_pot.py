@@ -117,6 +117,60 @@ def saving_ont():
     pass
 
 
+@app.route('/query_ont_pot_duration', methods=['GET'])
+def query_ont_pot_duration():
+    global default_wallet_account
+    if not isinstance(default_wallet_account, Account):
+        redirect_url = request.url.replace('query_ont_pot_duration', 'login')
+        return json.jsonify({'result': 'Account locked', 'redirect_url': redirect_url}), 500
+    address_bytes = default_wallet_account.get_address().to_array()
+    tx_hash = saving_pot.get_ont_pot_tx_hash(address_bytes)
+    if not isinstance(tx_hash, str) and len(tx_hash) != 64:
+        return json.jsonify({'result': tx_hash}), 501
+    event = saving_pot.query_create_pot_event(tx_hash)
+    if len(event) != 2:
+        return json.jsonify({'result': event}), 502
+    return json.jsonify({'result': event[1]}), 200
+
+
+@app.route('/query_ong_pot_duration', methods=['GET'])
+def query_ong_pot_duration():
+    global default_wallet_account
+    if not isinstance(default_wallet_account, Account):
+        redirect_url = request.url.replace('query_ong_pot_duration', 'login')
+        return json.jsonify({'result': 'Account locked', 'redirect_url': redirect_url}), 500
+    address_bytes = default_wallet_account.get_address().to_array()
+    tx_hash = saving_pot.get_ong_pot_tx_hash(address_bytes)
+    if not isinstance(tx_hash, str) and len(tx_hash) != 64:
+        return json.jsonify({'result': tx_hash}), 501
+    event = saving_pot.query_create_pot_event(tx_hash)
+    if len(event) != 2:
+        return json.jsonify({'result': event}), 502
+    return json.jsonify({'result': event[1]}), 200
+
+
+@app.route('/query_ont_pot_saving_time', methods=['GET'])
+def query_ont_pot_saving_time():
+    global default_wallet_account
+    if not isinstance(default_wallet_account, Account):
+        redirect_url = request.url.replace('query_ont_pot_saving_time', 'login')
+        return json.jsonify({'result': 'Account locked', 'redirect_url': redirect_url}), 500
+    address_bytes = default_wallet_account.get_address().to_array()
+    saving_time = saving_pot.query_ont_pot_saving_time(address_bytes)
+    return json.jsonify({'result': saving_time}), 200
+
+
+@app.route('/query_ong_pot_saving_time', methods=['GET'])
+def query_ong_pot_saving_time():
+    global default_wallet_account
+    if not isinstance(default_wallet_account, Account):
+        redirect_url = request.url.replace('query_ong_pot_saving_time', 'login')
+        return json.jsonify({'result': 'Account locked', 'redirect_url': redirect_url}), 500
+    address_bytes = default_wallet_account.get_address().to_array()
+    saving_time = saving_pot.query_ong_pot_saving_time(address_bytes)
+    return json.jsonify({'result': saving_time}), 200
+
+
 @app.route('/get_default_wallet_account_data')
 def get_default_wallet_account_data():
     if isinstance(app.config['WALLET_MANAGER'], WalletManager):

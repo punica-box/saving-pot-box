@@ -80,7 +80,7 @@
             <el-row>
                 <el-form-item label="Password" prop="pass">
                     <div class="block" style="margin-bottom: 15px;">
-                        <el-input suffix-icon="el-icon-edit-outline" type="password" v-model="loginForm.acctPass">
+                        <el-input suffix-icon="el-icon-edit-outline" type="password" v-model="loginForm.acctPass" @keyup.native.enter="login">
                         </el-input>
                     </div>
                 </el-form-item>
